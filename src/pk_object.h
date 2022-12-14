@@ -14,6 +14,3 @@ typedef struct pk_object {
   struct pk_object* next;
 } pk_object;
 
-typedef struct pk_function {
-  pk_object obj;
-} pk_function;

@@ -53,19 +53,20 @@ typedef enum {
 
   TOKEN_ERR,
   TOKEN_EOF
-} pk_tok_type;
+} pk_token_type;
 
 
 
-typedef struct pk_tok {
-  pk_tok_type type;
+typedef struct pk_token {
+  pk_token_type type;
   char *start;
   int length;
   int line;
-} pk_tok;
+} pk_token;
 
 typedef struct pk_lexer {
   char source[512];
+  int size;
   const char* current;
   int line;
   bool eof;
@@ -81,4 +82,4 @@ int pk_lexer_init(pk_lexer* l);
 int pk_lexer_init_buffer(pk_lexer* l, const char* buf, size_t len);
 int pk_lexer_init_file(pk_lexer* l, const char* file);
 
-pk_tok pk_lexer_next(pk_lexer* l);
+pk_token pk_lexer_next(pk_lexer* l);

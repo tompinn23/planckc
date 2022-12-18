@@ -1,13 +1,10 @@
 #pragma once
 
+#include "pk_code.h"
 #include "pk_lexer.h"
+#include <stdint.h>
 
 typedef struct pk_vm pk_vm;
-
-typedef struct expdesc {
-
-} expdesc;
-
 
 typedef struct pk_funcstate {
 

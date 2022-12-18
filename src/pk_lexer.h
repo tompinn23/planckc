@@ -1,7 +1,7 @@
 #pragma once
 
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 typedef enum {
   TOKEN_L_PAREN,
@@ -55,11 +55,9 @@ typedef enum {
   TOKEN_EOF
 } pk_token_type;
 
-
-
 typedef struct pk_token {
   pk_token_type type;
-  char *start;
+  char* start;
   int length;
   int line;
 } pk_token;
@@ -74,7 +72,7 @@ typedef struct pk_lexer {
   int (*getc)(struct pk_lexer* l);
   int (*peekc)(struct pk_lexer* l, int far);
   int (*reset)(struct pk_lexer* l);
-  void (*user_destroy)(struct pk_lexer *l);
+  void (*user_destroy)(struct pk_lexer* l);
 } pk_lexer;
 
 int pk_lexer_init(pk_lexer* l);

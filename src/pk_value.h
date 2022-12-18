@@ -15,9 +15,9 @@ struct pk_object;
 typedef struct pk_value {
   pk_val_type type;
   union {
-    long l;
-    double d;
-    bool b;
-    struct pk_object* o;
+    long ival;
+    double dval;
+    bool bval;
+    struct pk_object* object;
   };
 } pk_value;

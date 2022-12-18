@@ -1,11 +1,11 @@
 #pragma once
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include "pk_object.h"
-#include "pk_value.h"
 #include "pk_opcode.h"
+#include "pk_value.h"
 #define MAX_STACK 512
 
 typedef struct pk_chunk {
@@ -30,7 +30,6 @@ typedef struct pk_cf {
   pk_value* base;
   pk_value* top;
 } pk_cf;
-
 
 typedef struct pk_vm {
   pk_object* objects;

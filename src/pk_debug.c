@@ -15,29 +15,29 @@ void pk_debug_print_val(pk_value* val, char* buf, int len) {
     snprintf(buf, len, "nil");
     break;
   case VALUE_INT:
-    snprintf(buf, len, "%ld", val->l);
+    snprintf(buf, len, "%ld", val->ival);
     break;
   case VALUE_DBL:
-    snprintf(buf, len, "%f", val->d);
+    snprintf(buf, len, "%f", val->dval);
     break;
   case VALUE_BOOL:
-    snprintf(buf, len, "%s", val->b ? "true" : "false");
+    snprintf(buf, len, "%s", val->bval ? "true" : "false");
     break;
   /*case VALUE_CFUNC:
     snprintf(buf, len, "<%p>", val->func);
     break;
   */
   case VALUE_OBJ:
-    switch (val->o->type) {
+    switch (val->object->type) {
     case OBJECT_FUNC: {
-      //struct pk_func* fn = (struct pk_func*)val->obj;
-      //snprintf(buf, len, "<func: %s>", fn->name != NULL ? fn->name->str : "script");
+      // struct pk_func* fn = (struct pk_func*)val->obj;
+      // snprintf(buf, len, "<func: %s>", fn->name != NULL ? fn->name->str : "script");
       break;
     }
-    /*case OBJECT_UPVALUE:
-      snprintf(buf, len, "upvalue");
-      break;
-    */
+      /*case OBJECT_UPVALUE:
+        snprintf(buf, len, "upvalue");
+        break;
+      */
     }
     break;
   default:
@@ -56,12 +56,12 @@ const char* pk_debug_value_type(pk_value* val) {
   case VALUE_NIL:
     return "nil";
   case VALUE_OBJ:
-    switch(val->o->type) {
-      case OBJECT_FUNC:
-        return "object<func>";
-        break;
-      default:
-        return "object<unknown>";
+    switch (val->object->type) {
+    case OBJECT_FUNC:
+      return "object<func>";
+      break;
+    default:
+      return "object<unknown>";
     }
   default:
     return "unknown";

@@ -2,6 +2,8 @@
 
 #include "pk_object.h"
 #include "pk_value.h"
+#include "pk_vm.h"
+#include "pk_opcode.h"
 
 #include <stdio.h>
 
@@ -65,5 +67,26 @@ const char* pk_debug_value_type(pk_value* val) {
     }
   default:
     return "unknown";
+  }
+}
+
+void pk_chunk_debug(pk_chunk* chunk) {
+  for (int i = 0; i < chunk->size; i++) {
+    uint32_t code = *(chunk->code + i);
+    OpCode op = GET_OPCODE(code);
+    switch (getOpMode(op)) { 
+    case iABC:
+      printf("[%s] A: %d B: %d C: %d sC: %d\n", getOpName(op), GETARG_A(code), GETARG_B(code),
+             GETARG_C(code), GETARG_sC(code));
+      break;
+    case iAx:
+      printf("[%s] Ax: %d\n", getOpName(op), GETARG_Ax(code));
+      break;
+    case iAsBx:
+      printf("[%s] A: %d sBx: %d\n", getOpName(op), GETARG_A(code), GETARG_sBx(code));
+      break;
+    case iABx:
+        break;
+    }
   }
 }

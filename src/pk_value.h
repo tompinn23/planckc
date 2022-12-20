@@ -21,3 +21,12 @@ typedef struct pk_value {
     struct pk_object* object;
   };
 } pk_value;
+
+typedef enum { F2Ieq, F2Ifloor, F2Iceil } FloatEqMode;
+
+#define pk_IValue(n)                                                                               \
+  (pk_value) {.type = VALUE_INT, .ival = n}
+#define pk_DValue(n)                                                                               \
+  (pk_value) {.type = VALUE_DBL, .dval = n}
+
+int pk_value_dbl_to_int(double d, long* i, FloatEqMode mode);

@@ -8,6 +8,12 @@
 #include "pk_value.h"
 #define MAX_STACK 512
 
+typedef struct pk_constants {
+  int count;
+  int capacity;
+  pk_value* values;
+} pk_constants;
+
 typedef struct pk_chunk {
   Instruction* code;
   size_t size, capacity;
@@ -21,10 +27,13 @@ typedef struct pk_function {
   int arity;
   int locals;
   int stacksize;
+  uint8_t maxstacksize;
   int upvaluecount;
   pk_chunk chunk;
+  pk_constants constants;
   struct pk_function* enclosing;
 } pk_function;
+
 
 typedef struct pk_cf {
   pk_value* base;
@@ -40,7 +49,11 @@ typedef struct pk_vm {
 
 int pk_chunk_init(pk_chunk* chunk);
 void pk_chunk_free(pk_chunk* chunk);
-void pk_chunk_add(pk_chunk* chunk, Instruction ins);
+int pk_chunk_add(pk_chunk* chunk, Instruction ins);
+
+int pk_constants_init(pk_constants* c);
+int pk_constants_add(pk_constants* c, pk_value v);
+void pk_constants_destroy(pk_constants* c);
 
 pk_function* pk_function_new(pk_vm* vm, pk_func_type type);
 int pk_function_init(pk_function* func, pk_func_type type);

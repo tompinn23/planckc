@@ -171,7 +171,22 @@ typedef enum {
   OP_MOVE,   // AB R[A] = R[B]
   OP_RETURN, // return R{A}
   OP_LOADI,  // AsBx R[A] = sBx
+  OP_LOADF,  // AsBx R[A] = sBx
   OP_LOADK,  // ABx R[A] = K[Bx]
+  OP_LOADKX,
+  OP_EXTRAARG,
+  
+  OP_ADDI,
+
+  OP_ADDK,
+  OP_SUBK,
+  OP_MULTK,
+  OP_DIVK,
+
+  OP_ADD,
+  OP_SUB,
+  OP_MULT,
+  OP_DIV,
   NUM_OPCODES,
 } OpCode;
 
@@ -180,3 +195,4 @@ extern const char* pk_opnames[NUM_OPCODES];
 
 #define opmode(m) ((m))
 #define getOpMode(m) (cast(enum OpMode, pk_opmodes[m] & 7))
+#define getOpName(m) pk_opnames[m]

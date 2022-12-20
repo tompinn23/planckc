@@ -1,5 +1,6 @@
 #include "pk_compile.h"
 #include "pk_vm.h"
+#include "pk_debug.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -74,6 +75,11 @@ static bool match(pk_parser* p, pk_token_type type) {
   return true;
 }
 
+static enum Opr opr_token[] = {[TOKEN_MINUS] = OPR_MINUS,
+                               [TOKEN_PLUS]  = OPR_ADD,
+                               [TOKEN_STAR]  = OPR_MULT,
+                               [TOKEN_SLASH] = OPR_DIV};
+
 static void precedence(pk_parser* p, expdesc* e, int prec) {
   advance(p);
   parse_fn prefixR = pk_get_rule(p->previous.type)->prefix;
@@ -84,9 +90,13 @@ static void precedence(pk_parser* p, expdesc* e, int prec) {
   bool ca = prec <= PREC_ASSIGN;
   prefixR(p, e, ca);
   while (prec < pk_get_rule(p->current.type)->precedence) {
+    expdesc v2;
     advance(p);
     parse_fn infix = pk_get_rule(p->previous.type)->infix;
-    infix(p, e, ca);
+    enum Opr op         = opr_token[p->previous.type];
+    pk_code_infix(p, p->previous.type, e);
+    infix(p, &v2, ca);
+    pk_code_postfix(p, op, e, &v2);
   }
   if (ca && match(p, TOKEN_ASSIGN)) {
     error(p, "Invalid assignment target.");
@@ -98,10 +108,8 @@ static void unary(pk_parser* p, expdesc* e, bool ca) {}
 static void binary(pk_parser* p, expdesc* e, bool ca) {
   pk_token_type type    = p->previous.type;
   struct pkP_rule* rule = pk_get_rule(type);
-  expdesc r;
-  precedence(p, &r, rule->precedence + 1);
+  precedence(p, e, rule->precedence + 1);
   // TODO: constant folding
-  bool floating = e->kind == EK_DOUBLE || r.kind == EK_DOUBLE;
 }
 static void grouping(pk_parser* p, expdesc* e, bool ca) {}
 static void and_(pk_parser* p, expdesc* e, bool ca) {}
@@ -130,6 +138,7 @@ static void expression(pk_parser* p, expdesc* e) { precedence(p, e, PREC_ASSIGN)
 
 static void expression_statement(pk_parser* p) {
   expdesc e;
+
   expression(p, &e);
   consume(p, TOKEN_SEMICOLON, "Expecting ';' after expression.");
 }
@@ -140,6 +149,16 @@ static void statement(pk_parser* p) {
     expression_statement(p);
   }
 }
+
+static int parse_variable(pk_parser* p, const char* err) { consume(p, TOKEN_IDENT, err);
+  //declare_variable(p);
+  if (p->fs->scope > 0) {
+      return 0;
+  }
+  
+}
+
+static void var_declaration(pk_parser* p) { int global = parse_variable(p, "Expected a variable name"); }
 
 static void synchronize(pk_parser* p) {
   p->panicking = false;
@@ -164,7 +183,8 @@ static void synchronize(pk_parser* p) {
 
 static void declaration(pk_parser* p) {
   if (match(p, TOKEN_FUNC)) {
-
+  } else if (match(p, TOKEN_VAR)) {
+    var_declaration(p);
   } else {
     statement(p);
   }
@@ -218,14 +238,35 @@ static struct pkP_rule rules[] = {
     [TOKEN_EOF]    = {NULL,     NULL,   PREC_NONE  },
 };
 
+int pk_compile_nvarstack(int reg) {
+    return 0;
+}
+
 struct pkP_rule* pk_get_rule(pk_token_type type) { return &rules[type]; }
+
+int pk_funcstate_init(pk_vm* vm, pk_funcstate* fs) { fs->enclosing = NULL;
+  fs->freereg   = 0;
+  fs->func = pk_function_new(vm, FUNC_SCRIPT);
+  fs->scope = 0;
+}
+
 int pk_compile(pk_vm* vm, pk_lexer* l) {
   pk_parser p;
   p.vm = vm;
   p.l  = l;
+  p.error = p.panicking = false;
+  pk_funcstate fs;
+  pk_funcstate_init(vm, &fs);
+  p.fs                  = &fs;
   advance(&p);
   while (!match(&p, TOKEN_EOF)) {
     declaration(&p);
+  }
+  if (p.error) {
+    printf("%s\n", p.previous.start);
+  }
+  else {
+    pk_chunk_debug(&fs.func->chunk);
   }
   return 0;
 }

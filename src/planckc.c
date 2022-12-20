@@ -30,5 +30,5 @@ void print_op(uint32_t op) {
 
 int main(int argc, char** argv) {
   pk_vm* vm = pk_vm_new();
-  pk_vm_do_string(vm, "5 - 4 + 2;");
+  pk_vm_do_string(vm, "5 + 4 - 2;");
 }

@@ -23,7 +23,7 @@ void pk_chunk_free(pk_chunk* chunk) {
   pk_chunk_init(chunk);
 }
 
-void pk_chunk_add(pk_chunk* chunk, Instruction ins) {
+int pk_chunk_add(pk_chunk* chunk, Instruction ins) {
   if (chunk->capacity < chunk->size + 1) {
     int n = chunk->capacity * 2 + 8;
     chunk->code =
@@ -31,6 +31,28 @@ void pk_chunk_add(pk_chunk* chunk, Instruction ins) {
     chunk->capacity = n;
   }
   chunk->code[chunk->size++] = ins;
+  return chunk->size - 1;
+}
+
+int pk_constants_init(pk_constants* c) {
+    c->capacity = c->count = 0;
+  c->values               = NULL;
+}
+int pk_constants_add(pk_constants* c, pk_value v) {
+  if (c->capacity < c->count + 1) {
+    int new = c->capacity == 0 ? 8 : c->capacity * 2;
+    c->values =
+        mem_realloc(c->values, sizeof(pk_value) * c->capacity,
+                    sizeof(pk_value) * new);
+    c->capacity = new;
+  }
+  c->values[c->count++] = v;
+  return c->count - 1;
+}
+void pk_constants_destroy(pk_constants* c) {
+  c->capacity = 0;
+  c->count     = 0;
+  mem_free(c->values);
 }
 
 pk_function* pk_function_new(pk_vm* vm, pk_func_type type) {
@@ -41,14 +63,18 @@ pk_function* pk_function_new(pk_vm* vm, pk_func_type type) {
 
 static void pk_func_obj_destroy(pk_object* o) { pk_function_destroy((pk_function*)o); }
 
+
+
 int pk_function_init(pk_function* f, pk_func_type type) {
   f->obj.type     = OBJECT_FUNC;
   f->obj.destroy  = pk_func_obj_destroy;
   f->arity        = 0;
   f->locals       = 0;
   f->stacksize    = 0;
+  f->maxstacksize = 0;
   f->upvaluecount = 0;
   f->enclosing    = NULL;
+  pk_chunk_init(&f->chunk);
   return 0;
 }
 
